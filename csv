@@ -1,0 +1,4 @@
+import pandas
+tabl_head =['Emp_name','ID','INIT_pass','INIT_code','Fname','Lname','Dept','address']
+df = pandas.read_csv('/home/ammarqazaer/test/csv_file.csv',sep = ';',names=tabl_head,skiprows=[0])
+print (df)
