@@ -3,60 +3,77 @@ print("what you want to do :\n 1- select \n 2- update \n 3-delete \n 4- insert")
 choic = int(input("enter a number : "))
 conn = psycopg2.connect(user="postgres",password="Ammarqazaer79",host="127.0.0.1",port="5432",database="test1")
 cur = conn.cursor()
+def insert():
+
+	print ("you are in insert mode : \n")
+	Fname = input("Enter your first name : ")
+	Lname = input("Enter your last name : ")
+	age = input("Enter your age : ")
+	que = """INSERT INTO usres(first_name,last_name,age) VALUES (%s, %s, %s)"""
+	val = (Fname,Lname,age)
+	cur.execute(que,val)
+	conn.commit()
+
+def delete():
+
+	Fname = input("Enter the name you want to delete : ")
+	que = """delete from usres where first_name = %s"""
+	val = (Fname,)
+	cur.execute(que,val,)
+	conn.commit()
+
+def update():
+
+	Fname_old = input("Enter old first name : ")
+	Fname = input("Enter new first name : ")
+	Lname = input("Enter new last name : ")
+	age = input("Enter new age : ")
+	print("data befor update :")
+	que = """select * from usres where first_name =%s """
+	val = (Fname_old,)
+	cur.execute(que,val,)
+	usres_select=cur.fetchall()
+	for row in usres_select:
+		print("first name : ",row[0])
+		print("\n last name : ",row[1])
+		print("\n age : ",row[2])
+	que = """update usres set first_name=%s,last_name=%s,age=%s where first_name=%s  """
+	val = (Fname,Lname,age,Fname_old,)
+	cur.execute(que,val,)
+	conn.commit()
+	que = """select * from usres where first_name =%s """
+	val = (Fname,)
+	cur.execute(que,val,)
+	usres_select1=cur.fetchall()
+	for row1 in usres_select1:
+		print("first name : ",row1[0])
+		print("\n last name : ",row1[1])
+		print("\n age :",row1[2])
+
+def select():
+	que = """select * from usres"""
+	cur.execute(que)
+	print("selecting rows from usres")
+	usres_select=cur.fetchall()
+	for row in usres_select:
+		print("first name : ",row[0])
+		print("\n last name : ",row[1])
+		print("\n age : ",row[2])
 if choic == 1:
-    que = """select * from usres"""
-    cur.execute(que)
-    print("selecting rows from usres")
-    usres_select=cur.fetchall()
-    for row in usres_select:
-        print("first name : ",row[0])
-        print("\n last name : ",row[1])
-        print("\n age : ",row[2])
+    select()
+    
 elif choic == 2:
-    Fname_old = input("Enter old first name : ")
-    Fname = input("Enter new first name : ")
-    Lname = input("Enter new last name : ")
-    age = input("Enter new age : ")
-    print("data befor update :")
-    que = """select * from usres where first_name =%s """
-    val = (Fname_old,)
-    cur.execute(que,val,)
-    usres_select=cur.fetchall()
-    for row in usres_select:
-        print("first name : ",row[0])
-        print("\n last name : ",row[1])
-        print("\n age : ",row[2])
-    que = """update usres set first_name=%s,last_name=%s,age=%s where first_name=%s  """
-    val = (Fname,Lname,age,Fname_old,)
-    cur.execute(que,val,)
-    conn.commit()
-    que = """select * from usres where first_name =%s """
-    val = (Fname,)
-    cur.execute(que,val,)
-    usres_select1=cur.fetchall()
-    for row1 in usres_select1:
-        print("first name : ",row1[0])
-        print("\n last name : ",row1[1])
-        print("\n age :",row1[2])
+    update()
+    print("data have been updated")
 
 elif choic == 3:
-    Fname = input("Enter the name you want to delete : ")
-    que = """delete from usres where first_name = %s"""
-    val = (Fname,)
-    cur.execute(que,val,)
-    conn.commit()
     print("date have been dalated")
+	
 elif choic == 4:
-    print ("insert")
-    Fname = input("Enter your first name : ")
-    Lname = input("Enter your last name : ")
-    age = input("Enter your age : ")
-    que = """INSERT INTO usres(first_name,last_name,age) VALUES (%s, %s, %s)"""
-    val = (Fname,Lname,age)
-    cur.execute(que,val)
-    conn.commit()
     print ("Data have been added")
+	
 else :
     print("number you enter not from the list .-.")
+	
 cur.close()
 conn.close()
