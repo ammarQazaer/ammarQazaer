@@ -1,0 +1,17 @@
+import pandas
+import psycopg2
+import sys
+
+tabl_head =['Emp_name','ID','INIT_pass','INIT_code','Fname','Lname','Dept','address']
+df = pandas.read_csv('/home/ammarqazaer/test/csv_file.csv',sep = ';',names=tabl_head,skiprows=[0])
+
+conn = psycopg2.connect(user="postgres",password="Ammarqazaer79",host="127.0.0.1",port="5432",database="test1")
+cur = conn.cursor()
+SQLQ = "copy read_csv5 from stdin delimiter ';' csv"
+with open ('/home/ammarqazaer/test/csv_file.csv') as f:
+    print(f)
+    cur.copy_expert(SQLQ, f)
+
+conn.commit()
+cur.close()
+conn.close()
