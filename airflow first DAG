@@ -1,0 +1,31 @@
+from datetime import datetime
+from sched import scheduler
+from airflow import DAG
+#from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.python_operator import PythonOperator
+import random
+
+res =0
+
+def sumation():
+    num1=random.randint(1,10)
+    num2=random.randint(1,10)
+    res=num1+num2
+    return res
+
+def result():
+    if (res > 10):
+        return True
+    else:
+        return False
+
+dag1=DAG('sumation', description='enter num to sum' ,
+        schedule_interval='5 * * * *' ,    
+        start_date=datetime(2022, 1, 23),
+        catchup=False)
+
+sum_operator = PythonOperator(task_id='sumTowNum',python_callable=sumation,dag=dag1)
+
+res_operator = PythonOperator(task_id='result',python_callable=sumation,dag=dag1)
+
+sum_operator >> res_operator
