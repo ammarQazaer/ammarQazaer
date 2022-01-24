@@ -1,0 +1,25 @@
+from datetime import datetime
+from airflow import DAG
+from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.python_operator import PythonOperator
+
+def print_hello(age, ti):
+    name = ti.xcom_pull(task_ids='read_name1')
+    print( f"Hello world from {name} Airflow DAG!",
+    f"i am {age}")
+ 
+def read_name():
+    return 'hatem'
+
+dag = DAG('AAA', description='Hello World DAG',
+          schedule_interval='* * * * *',
+          start_date=datetime(2017, 3, 20),
+          catchup=False)
+
+Xcoms = PythonOperator(task_id='Xcoms', python_callable=print_hello, dag=dag, op_kwargs={'age':22})
+
+read_name1 = PythonOperator(task_id='read_name1', python_callable=read_name,dag=dag)
+ 
+
+
+read_name1 >> Xcoms   
