@@ -1,0 +1,101 @@
+from datetime import timedelta, datetime
+from airflow import DAG
+from airflow.operators.python_operator import PythonOperator
+from airflow.utils.dates import days_ago
+from airflow.models import Variable
+import psycopg2
+import pandas 
+import json, sys
+
+def read_json():
+    
+    conn=psycopg2.connect(user="postgres",
+    password="Ammarqazaer79",
+    host="localhost",
+    port="5432",
+    database="final_db")
+    cur= conn.cursor()
+
+    json_data = pandas.read_json('/home/ammar/test/data_json_1.json')
+    record_list = json_data.values.tolist()
+
+    PSQL = """INSERT INTO part_data_json (Username, Identifier, First_name, Last_name) VALUES (%s,%s,%s,%s) ON CONFLICT DO NOTHING"""
+    
+    for record in record_list:
+        cur.execute(PSQL,record)
+
+    conn.commit()
+    conn.close()
+    
+
+def copy_to_json():
+    
+    conn=psycopg2.connect(user="postgres",
+    password="Ammarqazaer79",
+    host="localhost",
+    port="5432",
+    database="final_db")
+    cur= conn.cursor()
+
+    PSQL = """select * from part_data_json"""
+    
+    cur.execute(PSQL)
+    out_put = cur.fetchall()
+    PSQL = """INSERT INTO cpoy_json (Username, Identifier, First_name, Last_name) VALUES (%s,%s,%s,%s) ON CONFLICT DO NOTHING"""
+    print(out_put)
+    copy_list_json = []
+    for row in out_put:
+        cur.execute(PSQL,row)
+        
+    conn.commit()
+    conn.close()
+    
+
+def read_from_db():
+    conn=psycopg2.connect(user="postgres",
+    password="Ammarqazaer79",
+    host="localhost",
+    port="5432",
+    database="final_db")
+    cur= conn.cursor()
+
+    PSQL = """select * from part_data_json"""
+    
+    cur.execute(PSQL)
+    out_put = cur.fetchall()
+    count =0 
+    for row in out_put:
+        print("row number : ",count)
+        for sub in range(len(row)):
+            print (row[sub])
+        count= count+1
+    conn.commit()
+    conn.close()
+
+
+    
+dag=DAG('print_data_from_json', description='V1.0.0', 
+        schedule_interval='0 * * * *',
+        start_date=datetime(2022, 1, 25),    
+        catchup=False
+        )
+
+check_json = PythonOperator(
+    task_id='check_json',
+    python_callable= read_json,
+    dag=dag
+)
+
+copy_to_json_1 = PythonOperator(
+    task_id='copy_to_json_1',
+    python_callable= copy_to_json,
+    dag=dag
+)
+
+read_db = PythonOperator(
+    task_id='read_db',
+    python_callable= read_from_db,
+    dag=dag
+)
+
+check_json >> read_db >> copy_to_json_1
